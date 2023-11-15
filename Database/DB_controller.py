@@ -1,53 +1,68 @@
+from asyncio.log import logger
+from botocore.exceptions import ClientError
+from operator import itemgetter
 import boto3
+from faker import Faker
 
 DEFAULT_RESSOURCE = boto3.resource("dynamodb", region_name="eu-north-1")
-def get_client_by_id(id):
-    dynamodb = boto3.resource("dynamodb", region_name="eu-north-1")
-    table = dynamodb.Table("Clients")
-    response = table.get_item(
-        Key={
-            "id": id,
-        }
-    )
-    item = response["Item"]
-    return item
 
 
 class Clients:
-    """Encapsulates an Amazon DynamoDB table of movie data."""
+    """Encapsulates an Amazon DynamoDB table of Clients."""
 
-    def __init__(self, dyn_resource: DEFAULT_RESSOURCE):
+    def __init__(self, dyn_resource=DEFAULT_RESSOURCE):
         """
         :param dyn_resource: A Boto3 DynamoDB resource.
         """
-        self.dyn_resource = dyn_resource
-        # The table variable is set during the scenario in the call to
-        # 'exists' if the table exists. Otherwise, it is set by 'create_table'.
-        self.table = None
+        self.dynamodb = dyn_resource
+        self.table = self.dynamodb.Table("Clients")
 
-    def add_movie(self, title, year, plot, rating):
+    def get_client_by_id(self, id):
+        response = self.table.get_item(
+            Key={
+                "id": id,
+            }
+        )
+        item = response["Item"]
+        return item
+
+    def get_all_clients(self):
+        unordered_client_list = self.table.scan()["Items"]
+        return sorted(unordered_client_list, key=itemgetter("id"))
+
+    def add_client(self, name, email, bonito, balance):
         """
-        Adds a movie to the table.
+        Adds a client to the table.
 
-        :param title: The title of the movie.
-        :param year: The release year of the movie.
-        :param plot: The plot summary of the movie.
-        :param rating: The quality rating of the movie.
         """
         try:
+            items = self.get_all_clients()
+            # gets highest existing id to naturaly increase by one the id for new entry
+            new_id = items[-1].get("id") + 1
             self.table.put_item(
                 Item={
-                    "year": year,
-                    "title": title,
-                    "info": {"plot": plot, "rating": Decimal(str(rating))},
+                    "id": new_id,
+                    "name": name,
+                    "email": email,
+                    "bonito": bonito,
+                    "balance": balance,
                 }
             )
         except ClientError as err:
             logger.error(
-                "Couldn't add movie %s to table %s. Here's why: %s: %s",
-                title,
-                self.table.name,
-                err.response["Error"]["Code"],
-                err.response["Error"]["Message"],
+                f"""Couldn't add movie {name} to clients table . Here's why: {err.response["Error"]["Code"]}: {err.response["Error"]["Message"]}"""
             )
             raise
+
+
+# To do some quick test on the DB
+# TO DO:
+# put that in a proper testcase later
+
+# bd = Clients()
+# faker = Faker()
+# print(bd.get_client_by_id(2))
+# print(bd.get_all_clients())
+# breakpoint()
+# bd.add_client(faker.name(), faker.email(), faker.pyint(), faker.pyint())
+# print(bd.get_all_clients())
