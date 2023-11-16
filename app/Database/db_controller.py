@@ -2,7 +2,6 @@ from asyncio.log import logger
 from botocore.exceptions import ClientError
 from operator import itemgetter
 import boto3
-from faker import Faker
 
 DEFAULT_RESSOURCE = boto3.resource("dynamodb", region_name="eu-north-1")
 
@@ -50,19 +49,7 @@ class Clients:
             )
         except ClientError as err:
             logger.error(
-                f"""Couldn't add movie {name} to clients table . Here's why: {err.response["Error"]["Code"]}: {err.response["Error"]["Message"]}"""
+                f"""Couldn't add movie {name} to clients table . """
+                f"""Here's why: {err.response["Error"]["Code"]}: {err.response["Error"]["Message"]}"""
             )
             raise
-
-
-# To do some quick test on the DB
-# TO DO:
-# put that in a proper testcase later
-
-# bd = Clients()
-# faker = Faker()
-# print(bd.get_client_by_id(2))
-# print(bd.get_all_clients())
-# breakpoint()
-# bd.add_client(faker.name(), faker.email(), faker.pyint(), faker.pyint())
-# print(bd.get_all_clients())
