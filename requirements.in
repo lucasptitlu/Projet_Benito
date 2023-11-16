@@ -1,0 +1,28 @@
+# To generate a `requirements.txt` from this, run `pip-compile`,
+# which is available in the `pip-tools` package. You can install it
+# with `pip install pip-tools`.
+
+# `pip-compile` will not upgrade anything in requirements.txt unless:
+#  - A constraint here in `requirements.in` forces it to.
+#  - You run it as `pip-compile --upgrade-package <package>` to
+#    upgrade a specific package.
+#  - You run it as `pip-compile --upgrade` to upgrade all packages.
+
+# To up- or downgrade your installed packages to match what's in
+# requirements.txt, you can run `pip install -r requirements.txt` as
+# usual. Note however that this will not remove any dependencies.
+
+# To make your set of installed dependencies exactly match that of
+# requirements.txt (with a couple of exceptions that are left alone,
+# basically packaging tools, like pip and pip-tools itself), run
+# `pip-sync`. Make sure that you are running a `pip-sync` installed in
+# your virtualenv, not one installed globally, because it operates on
+# the scope in which it was installed. This is true for `pip` as well,
+# but `pip` is always installed in the virtualenv when it is created.boto3
+
+# dependencies list:
+flask
+Faker
+mypy
+flake8
+pytest
