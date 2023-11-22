@@ -49,7 +49,7 @@ class Clients:
             )
         except ClientError as err:
             logger.error(
-                f"""Couldn't add movie {name} to clients table . """
+                f"""Couldn't add {name} to clients table . """
                 f"""Here's why: {err.response["Error"]["Code"]}: {err.response["Error"]["Message"]}"""
             )
             raise
