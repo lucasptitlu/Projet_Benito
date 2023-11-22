@@ -192,6 +192,8 @@ sample.iml
 
 use/
 
+.gitconfig
+
  
 
 db/*
