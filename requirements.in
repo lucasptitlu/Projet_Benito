@@ -26,3 +26,6 @@ Faker
 mypy
 flake8
 pytest
+fastapi
+uvicorn
+boto3
