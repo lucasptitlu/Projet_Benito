@@ -1,4 +1,5 @@
 from asyncio.log import logger
+from decimal import Decimal
 from botocore.exceptions import ClientError
 from app.Database.base import Base
 
@@ -8,6 +9,28 @@ class Clients(Base):
 
     def init_table(self):
         self.table = self.dynamodb.Table("Clients")
+
+    def credit_by_id(self, id, bonito):
+        """
+        Credit specific client with bonito
+
+        """
+        try:
+            user = self.get_entry_by_id(id)
+            self.table.update_item(
+                Key={"id": id},
+                UpdateExpression="set bonito=:r",
+                ExpressionAttributeValues={":r": Decimal(user.get("bonito") + bonito)},
+                ReturnValues="UPDATED_NEW",
+            )
+        except ClientError as err:
+            logger.error(
+                "Couldn't update bonito %s. Here's why: %s: %s",
+                bonito,
+                err.response["Error"]["Code"],
+                err.response["Error"]["Message"],
+            )
+            raise
 
     def add_client(self, name, email, bonito, bonitard):
         """

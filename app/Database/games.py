@@ -1,4 +1,5 @@
 from asyncio.log import logger
+from datetime import datetime
 from botocore.exceptions import ClientError
 
 from app.Database.base import Base
@@ -9,6 +10,37 @@ class Games(Base):
 
     def init_table(self):
         self.table = self.dynamodb.Table("Games")
+
+    def start_game(self, id: int):
+        self.table.update_item(
+            Key={"id": id},
+            UpdateExpression="set start_time=:r,in_use=:p ",
+            ExpressionAttributeValues={
+                ":r": datetime.now().strftime("%D-%H:%M:%S"),
+                ":p": True,
+            },
+            ReturnValues="UPDATED_NEW",
+        )
+
+    def end_game(self, id: int):
+        game = self.get_entry_by_id(id)
+        self.table.update_item(
+            Key={"id": id},
+            UpdateExpression="set in_use=:p ",
+            ExpressionAttributeValues={
+                ":p": False,
+            },
+            ReturnValues="UPDATED_NEW",
+        )
+        breakpoint()
+        # ca marche pas
+
+        return datetime.now().strftime("%D-%H:%M:%S") - game.get("start_time")
+
+    # datetime.strptime(
+    #         game.get("start_time"), "%d/%m/%y-%H:%M:%S"
+    #     )
+    # return datetime.now() - game.get("start_time")
 
     def add_game(self, name, category, min_ration, hour_ratio):
         """
@@ -26,6 +58,8 @@ class Games(Base):
                     "category": category,
                     "min_ration": min_ration,
                     "hour_ratio": hour_ratio,
+                    "in_use": False,
+                    "start_time": None,
                 }
             )
         except ClientError as err:
